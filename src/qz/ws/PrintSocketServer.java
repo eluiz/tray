@@ -129,6 +129,7 @@ public class PrintSocketServer {
     public static void runServer() {
         final AtomicBoolean running = new AtomicBoolean(false);
 
+        log.info("Starting {} server", Constants.ABOUT_TITLE);
         trayProperties = getTrayProperties();
 
         while(!running.get() && securePortIndex.get() < SECURE_PORTS.size() && insecurePortIndex.get() < INSECURE_PORTS.size()) {

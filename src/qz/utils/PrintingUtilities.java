@@ -59,7 +59,7 @@ public class PrintingUtilities {
 
     public synchronized static PrintProcessor getPrintProcessor(Type type) {
         try {
-            if (processorPool == null) {
+            if (processorPool == null || processorPool.isClosed()) {
                 processorPool = new GenericKeyedObjectPool<>(new ProcessorFactory());
 
                 long memory = Runtime.getRuntime().maxMemory() / 1000000;
@@ -74,7 +74,7 @@ public class PrintingUtilities {
                 }
             }
 
-            log.trace("Waiting for processor, {}/{} already in use", processorPool.getNumActive(), processorPool.getMaxTotal());
+            log.debug("Waiting for processor, {}/{} already in use", processorPool.getNumActive(), processorPool.getMaxTotal());
             return processorPool.borrowObject(type);
         }
         catch(Exception e) {
@@ -87,7 +87,16 @@ public class PrintingUtilities {
             log.trace("Returning processor back to pool");
             processorPool.returnObject(processor.getType(), processor);
         }
-        catch(Exception ignore) {}
+        catch(Exception e) {
+            log.error("Failed to return processor", e);
+            try { processorPool.invalidateObject(processor.getType(), processor); } catch(Exception ignore) {}
+        }
+    }
+
+    public static void resetProcessorPool() {
+        if (processorPool != null) {
+            processorPool.close();
+        }
     }
 
     /**

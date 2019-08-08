@@ -460,10 +460,14 @@ public class TrayManager {
                 @Override
                 public void run() {
                     try {
+                        log.info("Reloading {} server", Constants.ABOUT_TITLE);
+
                         setDangerIcon();
                         running.set(false);
                         securePortIndex.set(0);
                         insecurePortIndex.set(0);
+
+                        PrintingUtilities.resetProcessorPool();
 
                         server.stop();
                     }
